@@ -39,7 +39,7 @@ const E = Me.imports.enum;
 const SJCL = Me.imports.libsjcl;
 
 const ID_ENTRY_FOCUS_TIMEOUT = 20;
-
+/*
 const RecentIdPopupMenuItem = new Lang.Class({
     Name: 'RecentIdPopupMenuItem',
     Extends: PopupMenu.PopupBaseMenuItem,
@@ -57,7 +57,7 @@ const RecentIdPopupMenuItem = new Lang.Class({
         this.emit('selected');
     }
 });
-
+*/
 const PasswordCalculator = Lang.Class({
     Name: 'PasswordCalculator',
     Extends: PanelMenu.Button,
@@ -172,7 +172,7 @@ const PasswordCalculator = Lang.Class({
         
         let recent = this.getSettings().get_strv(C.SETTINGS_RECENT_DOMAINS);
         let maxRecent = this.getSettings().get_int(C.SETTINGS_RECENT_DOMAINS_MAXIMUM);
-
+/*
         for (let i=0,l=recent.length; i<l&&(!maxRecent||i<maxRecent); i++) {
             let item = new RecentIdPopupMenuItem(recent[i]);
             item.connect('selected', Lang.bind(this, function(s, domain) {
@@ -181,7 +181,7 @@ const PasswordCalculator = Lang.Class({
             }, recent[i]));
             this.recentDomainCombo.menu.addMenuItem(item, i);
         }
-
+*/
         this.recentDomainCombo.label.set_text(recent.length ? _('Recent domains') : _('No recent domains'));
     },
 
@@ -240,7 +240,7 @@ const PasswordCalculator = Lang.Class({
 
         this.menu.addMenuItem(controlForm);
         this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
-        this.menu.addMenuItem(this.recentDomainCombo);
+        //this.menu.addMenuItem(this.recentDomainCombo);
         this.menu.connect('open-state-changed', Lang.bind(this, function(sender, open) {
             this.clearInput();
             if (open) {
