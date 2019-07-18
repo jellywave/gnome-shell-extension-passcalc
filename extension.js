@@ -40,24 +40,6 @@ const SJCL = Me.imports.libsjcl;
 
 const ID_ENTRY_FOCUS_TIMEOUT = 20;
 
-const RecentIdPopupMenuItem = new Lang.Class({
-    Name: 'RecentIdPopupMenuItem',
-    Extends: PopupMenu.PopupBaseMenuItem,
-
-    _init: function (text, params) {
-        this.parent(params);
-
-        this.label = new St.Label({ text: text });
-        this.actor.add_child(this.label);
-        this.actor.label_actor = this.label;
-    },
-    
-    activate: function(event) {
-        this._parent.close(true);
-        this.emit('selected');
-    }
-});
-
 const PasswordCalculator = Lang.Class({
     Name: 'PasswordCalculator',
     Extends: PanelMenu.Button,
@@ -136,7 +118,6 @@ const PasswordCalculator = Lang.Class({
                     Main.notify(_('PassCalc: Password copied to clipboard.'));
                 }
 
-                this.storeRecentDomain(domain);
                 
                 this.setPasswordHash(SJCL.hash.sha512(password));
                 Mainloop.timeout_add(this.getSettings().get_int(C.SETTINGS_CLIPBOARD_TIMEOUT), Lang.bind(this, function() {
@@ -154,36 +135,6 @@ const PasswordCalculator = Lang.Class({
         }
     },
 
-    storeRecentDomain: function(domain) {
-        let current = this.getSettings().get_strv(C.SETTINGS_RECENT_DOMAINS);
-
-        let index = current.indexOf(domain);
-        if (index >= 0) {
-            current.splice(index, 1);
-        }
-
-        current.unshift(domain);
-        this.getSettings().set_strv(C.SETTINGS_RECENT_DOMAINS, current);
-        this.updateRecentDomainList();
-    },
-
-    updateRecentDomainList: function() {
-        this.recentDomainCombo.menu.removeAll();
-        
-        let recent = this.getSettings().get_strv(C.SETTINGS_RECENT_DOMAINS);
-        let maxRecent = this.getSettings().get_int(C.SETTINGS_RECENT_DOMAINS_MAXIMUM);
-
-        for (let i=0,l=recent.length; i<l&&(!maxRecent||i<maxRecent); i++) {
-            let item = new RecentIdPopupMenuItem(recent[i]);
-            item.connect('selected', Lang.bind(this, function(s, domain) {
-                this.domainEntry.set_text(domain);
-                this.passphraseEntry.clutter_text.grab_key_focus();
-            }, recent[i]));
-            this.recentDomainCombo.menu.addMenuItem(item, i);
-        }
-
-        this.recentDomainCombo.label.set_text(recent.length ? _('Recent domains') : _('No recent domains'));
-    },
 
     _buildWidget: function() {
         let hbox = new St.BoxLayout({
@@ -235,12 +186,9 @@ const PasswordCalculator = Lang.Class({
         });
         controlForm.actor.add_actor(this.passwordBox);
 
-        this.recentDomainCombo = new PopupMenu.PopupSubMenuMenuItem('');
-        this.updateRecentDomainList();
 
         this.menu.addMenuItem(controlForm);
         this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
-        this.menu.addMenuItem(this.recentDomainCombo);
         this.menu.connect('open-state-changed', Lang.bind(this, function(sender, open) {
             this.clearInput();
             if (open) {
@@ -250,9 +198,6 @@ const PasswordCalculator = Lang.Class({
             }
         }));
 
-        this.getSettings().connect('changed', Lang.bind(this, function() {
-            this.updateRecentDomainList();
-        }));
     },
 
     _computePasswordConcat: function(domain, passphrase, salt, length) {
